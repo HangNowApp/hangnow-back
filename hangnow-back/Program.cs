@@ -49,8 +49,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
     {
-        options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-        options.AddPolicy("User", policy => policy.RequireRole("User"));
+        options.AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin));
+        options.AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
+        options.AddPolicy(Roles.PremiumUser, policy => policy.RequireRole(Roles.PremiumUser));
     });
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));

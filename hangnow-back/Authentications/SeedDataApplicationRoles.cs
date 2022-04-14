@@ -6,7 +6,7 @@ public static class SeedDataApplicationRoles
 {
     public static void SeedRoles(RoleManager<IdentityRole> roleManager)
     {
-        foreach (var role in new string[2] { "Admin", "User" })
+        foreach (var role in new [] { Roles.Admin, Roles.User, Roles.PremiumUser })
         {
             var result =  roleManager.RoleExistsAsync(role).Result;
             if (!result)
