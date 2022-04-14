@@ -23,7 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => { })
+builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options => { })
     .AddEntityFrameworkStores<Context>();
 
 builder.Services.AddAuthentication(options =>
@@ -63,7 +63,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    SeedDataApplicationRoles.SeedRoles(services.GetRequiredService<RoleManager<IdentityRole>>());
+    SeedDataApplicationRoles.SeedRoles(services.GetRequiredService<RoleManager<IdentityRole<Guid>>>());
 }
 
 if (builder.Environment.IsDevelopment())
