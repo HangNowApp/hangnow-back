@@ -16,22 +16,22 @@ namespace hangnow_back.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
+    private readonly Context _context;
     private readonly AppSettings _jwtConfig;
     private readonly UserManager<AppUser> _userManager;
-    private readonly Context _context;
 
-    public AuthController(UserManager<AppUser> userManager, IOptionsMonitor<AppSettings> optionsMonitor, Context context)
+    public AuthController(UserManager<AppUser> userManager, IOptionsMonitor<AppSettings> optionsMonitor,
+        Context context)
     {
         _userManager = userManager;
         _jwtConfig = optionsMonitor.CurrentValue;
         _context = context;
     }
 
-    [HttpPost]
-    [Route("register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationRequest user)
     {
-        var newUser = new AppUser {Email = user.Email, UserName = user.Name};
+        var newUser = new AppUser {Email = user.Email, UserName = user.UserName};
         var isCreated = await _userManager.CreateAsync(newUser, user.Password);
 
         if (!isCreated.Succeeded)
@@ -40,10 +40,9 @@ public class AuthController : ControllerBase
                 Result = false,
                 Message = string.Join(Environment.NewLine, isCreated.Errors.Select(e => e.Description).ToList())
             });
-        
-        // 
+
         var roles = await _userManager.GetRolesAsync(newUser);
-        
+
         var jwtToken = GenerateJwtToken(newUser, roles);
 
         return Ok(new RegistrationResponse
@@ -53,17 +52,16 @@ public class AuthController : ControllerBase
         });
     }
 
-    [HttpPost]
-    [Route("login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest user)
     {
         var existingUser = await _userManager.FindByEmailAsync(user.Email);
-        
+
         if (existingUser == null)
             return BadRequest(new RegistrationResponse
             {
                 Result = false,
-                Message = "Invalid authentication request"
+                Message = I18n.Get("invalid_auth_request")
             });
 
         var isCorrect = await _userManager.CheckPasswordAsync(existingUser, user.Password);
@@ -72,9 +70,9 @@ public class AuthController : ControllerBase
             return BadRequest(new RegistrationResponse
             {
                 Result = false,
-                Message = "Invalid authentication request"
+                Message = I18n.Get("invalid_auth_request")
             });
-        
+
         var roles = await _userManager.GetRolesAsync(existingUser);
 
         var jwtToken = GenerateJwtToken(existingUser, roles);
@@ -85,7 +83,57 @@ public class AuthController : ControllerBase
             Token = jwtToken
         });
     }
+    
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        var roles = await _userManager.GetRolesAsync(user);
+        var jwtToken = GenerateJwtToken(user, roles);
 
+        return Ok(new RegistrationResponse
+        {
+            Result = true,
+            Token = jwtToken
+        });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMe()
+    {
+        var user = await HttpContext.User.GetUser(_userManager);
+
+        return Ok(user);
+    }
+
+    [Authorize(Policy = "Admin")]
+    [HttpGet("{id:guid}")]
+    public IActionResult GetById(Guid id)
+    {
+        var user = _context.Users.FirstOrDefault(e => e.Id == id);
+        
+        if (user == null)
+            return NotFound();
+        
+        return Ok(UserDto.FromUser(user));
+    }
+
+    // controller to add admin to a role
+    [Authorize(Policy = "Admin")]
+    [HttpPost("{id:guid}/{role}")]
+    public IActionResult AddToRole(Guid id, string role)
+    {
+        var user = _context.Users.FirstOrDefault(e => e.Id == id);
+
+        if (user == null)
+            return BadRequest(new {message = I18n.Get("user_not_found")});
+
+        var result = _userManager.AddToRoleAsync(user, role).Result;
+        return Ok(result);
+    }
+    
     private string GenerateJwtToken(AppUser user, IEnumerable<string>? roles)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -96,7 +144,7 @@ public class AuthController : ControllerBase
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim("Id", user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             }),
@@ -106,45 +154,11 @@ public class AuthController : ControllerBase
         };
 
         if (roles != null)
-        {
             foreach (var role in roles)
                 tokenDescriptor.Subject.AddClaim(new Claim(ClaimTypes.Role, role));
-        }
 
         var token = jwtTokenHandler.CreateToken(tokenDescriptor);
 
         return jwtTokenHandler.WriteToken(token);
     }
-    
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult GetMe([FromQuery(Name = "isPayload")] string isPayload)
-    {
-        var user = HttpContext.User.GetUser(_userManager);
-
-        return Ok(user);
-    }
-    
-    [Authorize(Policy = "Admin")]
-    [HttpGet("{id}")]
-    public IActionResult GetById(Guid id)
-    {
-        var user = _context.Users.FirstOrDefault(e => e.Id == id);
-        return Ok(user);
-    }
-    
-    // controller to add admin to a role
-    [Authorize(Policy = "Admin")]
-    [HttpPost("{id}/{role}")]
-    public IActionResult AddToRole(Guid id, string role)
-    {
-        var user = _context.Users.FirstOrDefault(e => e.Id == id);
-        
-        if (user == null)
-            return BadRequest(new {message = "User not found"});
-        
-        var result = _userManager.AddToRoleAsync(user, role).Result;
-        return Ok(result);
-    }
-    
 }
