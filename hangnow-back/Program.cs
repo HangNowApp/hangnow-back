@@ -33,7 +33,8 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(jwt =>
     {
-        var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("AppSettings")["Secret"] ?? throw new InvalidOperationException());
+        var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("AppSettings")["Secret"] ??
+                                          throw new InvalidOperationException());
 
         jwt.SaveToken = true;
         jwt.TokenValidationParameters = new TokenValidationParameters
@@ -48,11 +49,11 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization(options =>
-    {
-        options.AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin));
-        options.AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
-        options.AddPolicy(Roles.PremiumUser, policy => policy.RequireRole(Roles.PremiumUser));
-    });
+{
+    options.AddPolicy(Roles.Admin, policy => policy.RequireRole(Roles.Admin));
+    options.AddPolicy(Roles.User, policy => policy.RequireRole(Roles.User));
+    options.AddPolicy(Roles.PremiumUser, policy => policy.RequireRole(Roles.PremiumUser));
+});
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
@@ -67,16 +68,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 if (builder.Environment.IsDevelopment())
-{
     app.UseCors(corsSettings => corsSettings
         .AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader());
-}
 else
-{
     app.UseCors(corsSettings => corsSettings.WithOrigins("https://mon-front.com"));
-}
 
 // custom jwt auth middleware
 

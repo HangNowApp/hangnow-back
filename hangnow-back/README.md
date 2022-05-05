@@ -1,4 +1,3 @@
-
 ### Setup db bash instructions
 
 ```bash
@@ -8,6 +7,7 @@ dotnet ef database update
 ```
 
 To create a migration for the database:
+
 ```bash
 dotnet ef migrations add SomeTableChange
 ```

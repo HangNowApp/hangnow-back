@@ -8,7 +8,7 @@ namespace hangnow_back.Controllers;
 public class EventController : ControllerBase
 {
     private readonly Context _context;
-    
+
     public EventController(Context context)
     {
         _context = context;
