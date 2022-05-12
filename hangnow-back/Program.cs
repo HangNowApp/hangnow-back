@@ -1,5 +1,6 @@
 using System.Text;
 using hangnow_back.Authentications;
+using hangnow_back.Manager;
 using hangnow_back.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,8 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
         options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
     }
 );
+
+builder.Services.AddTransient<EventManager>();
 
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));

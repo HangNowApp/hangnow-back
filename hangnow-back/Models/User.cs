@@ -6,10 +6,12 @@ public class User : IdentityUser<Guid>
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public string ProfilePicture { get; set; }
+    public string AvatarUrl { get; set; }
     
     public bool IsPremium { get; set; } = false;
     
-    public List<UserTags> Tags { get; set; }
-    public List<Participants> Events { get; set; }
+    public ICollection<UserTag> Tags { get; set; }
+    public ICollection<Participant> Events { get; set; }
+    
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

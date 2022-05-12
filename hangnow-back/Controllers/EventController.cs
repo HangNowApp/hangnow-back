@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using hangnow_back.Authentications;
+using hangnow_back.DataTransferObject;
+using hangnow_back.Manager;
 using hangnow_back.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace hangnow_back.Controllers;
 
@@ -19,25 +14,45 @@ public class EventController : ControllerBase
 {
     private readonly Context _context;
     private readonly UserManager<User> _userManager;
+    private readonly EventManager _eventManager;
 
-    public EventController(Context context, UserManager<User> userManager)
+    public EventController(Context context, EventManager eventManager, UserManager<User> userManager)
     {
         _context = context;
+        _eventManager = eventManager;
         _userManager = userManager;
     }
 
     // GET: api/event
     [HttpGet]
-    public async Task<List<Event>> Get()
+    public async Task<List<EventListDto>> Get()
     {
-        return await _context.Events.ToListAsync();
+        return await _eventManager.GetEventList();
     }
 
     // GET: api/event/5
     [HttpGet("{id:guid}")]
-    public async Task<Event?> Get(Guid id)
+    public async Task<EventDto?> Get(Guid id)
     {
-        return await _context.Events.FirstOrDefaultAsync(e => e.Id == id);
+        return await _eventManager.GetEvent(id);
+    }
+    
+    // POST: api/event/5/join
+    [HttpPost("{id:guid}/join")]
+    [Authorize]
+    public async Task<EventDto?> Join(Guid id)
+    {
+        var user = await _userManager.GetUserAsync(HttpContext.User);
+        return await _eventManager.JoinEvent(id, user);
+    }
+    
+    // POST: api/event/5/join
+    [HttpDelete("{id:guid}/leave")]
+    [Authorize]
+    public async Task<MessageResponse?> Leave(Guid id)
+    {
+        var user = await _userManager.GetUserAsync(HttpContext.User);
+        return await _eventManager.LeaveEvent(id, user);
     }
 
     // POST: api/event
