@@ -11,7 +11,7 @@ public class UserDto
     public string PhoneNumber { get; set; }
     public bool IsPremium { get; set; }
     
-    public static UserDto FromUser(AppUser user)
+    public static UserDto FromUser(User user)
     {
         return new UserDto
         {

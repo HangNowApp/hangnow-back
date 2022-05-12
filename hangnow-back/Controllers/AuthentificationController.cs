@@ -18,9 +18,9 @@ public class AuthController : ControllerBase
 {
     private readonly Context _context;
     private readonly AppSettings _jwtConfig;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly UserManager<User> _userManager;
 
-    public AuthController(UserManager<AppUser> userManager, IOptionsMonitor<AppSettings> optionsMonitor,
+    public AuthController(UserManager<User> userManager, IOptionsMonitor<AppSettings> optionsMonitor,
         Context context)
     {
         _userManager = userManager;
@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationRequest user)
     {
-        var newUser = new AppUser {Email = user.Email, UserName = user.UserName};
+        var newUser = new User {Email = user.Email, UserName = user.UserName};
         var isCreated = await _userManager.CreateAsync(newUser, user.Password);
 
         if (!isCreated.Succeeded)
@@ -134,7 +134,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
     
-    private string GenerateJwtToken(AppUser user, IEnumerable<string>? roles)
+    private string GenerateJwtToken(User user, IEnumerable<string>? roles)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
 

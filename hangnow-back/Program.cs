@@ -23,7 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));
 
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options => { })
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { })
     .AddEntityFrameworkStores<Context>();
 
 builder.Services.AddAuthentication(options =>
@@ -56,6 +56,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+builder.Services.AddSignalR();
 
 // Build the application and return it
 
