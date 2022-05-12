@@ -13,7 +13,7 @@ public static class ClaimsPrincipalExtensions
         return id == null ? Guid.Empty : Guid.Parse(id);
     }
 
-    public static async Task<AppUser?> GetUser(this ClaimsPrincipal principal, UserManager<AppUser> userManager)
+    public static async Task<User?> GetUser(this ClaimsPrincipal principal, UserManager<User> userManager)
     {
         return await userManager.GetUserAsync(principal);
     }
