@@ -8,15 +8,15 @@ namespace hangnow_back.Models;
 
 public class Context : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
-    public DbSet<Event> Events { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<EventTags> EventTags { get; set; }
-    public DbSet<UserTags> UserTags { get; set; }
-    public DbSet<Participants> Participants { get; set; }
-
     public Context(DbContextOptions<Context> options) : base(options)
     {
     }
+
+    public DbSet<Event> Events { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<EventTag> EventTags { get; set; }
+    public DbSet<UserTag> UserTags { get; set; }
+    public DbSet<Participant> Participants { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

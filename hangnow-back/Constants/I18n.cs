@@ -8,18 +8,25 @@ public class I18n
         {"invalid_key", "Invalid key: {0}"},
         {"user_not_found", "User not found"},
         {"invalid_auth_request", "Invalid authentication request"},
+        {"user_not_found", "User not found"},
+        {"user_updated", "User updated"},
+        {"invalid_old_password", "Invalid old password"},
+        {"password_change_failed", "Password change failed"},
+        {"password_changed", "Password changed"}
     };
-    
+
     private static readonly Dictionary<string, Dictionary<string, string>> Translations = new()
     {
         {"en", EnTranslation}
     };
-    
+
     public static string Get(string key, params object[] args)
     {
         var currentDictionary = Translations["en"];
 
         // ReSharper disable once TailRecursiveCall
-        return !currentDictionary.ContainsKey(key) ? Get("invalid_key", key) : string.Format(currentDictionary[key], args);
+        return !currentDictionary.ContainsKey(key)
+            ? Get("invalid_key", key)
+            : string.Format(currentDictionary[key], args);
     }
 }

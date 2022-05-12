@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using hangnow_back.Authentications;
+using hangnow_back.DataTransferObject;
 using hangnow_back.Models;
 using Jwtest;
 using Microsoft.AspNetCore.Authorization;
@@ -83,7 +84,73 @@ public class AuthController : ControllerBase
             Token = jwtToken
         });
     }
-    
+
+    [Authorize]
+    [HttpPost("update")]
+    public async Task<IActionResult> Update([FromBody] UpdateUserRequest updateRequest)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+            return BadRequest(new RegistrationResponse
+            {
+                Result = false,
+                Message = I18n.Get("user_not_found")
+            });
+
+        user.UserName = updateRequest.UserName;
+        user.Email = updateRequest.Email;
+        user.AvatarUrl = updateRequest.AvatarUrl;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new MessageResponse
+        {
+            Success = true,
+            Message = I18n.Get("user_updated")
+        });
+    }
+
+    [Authorize]
+    [HttpPost("change_password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+            return BadRequest(new RegistrationResponse
+            {
+                Result = false,
+                Message = I18n.Get("user_not_found")
+            });
+
+        var isCorrect = await _userManager.CheckPasswordAsync(user, changePasswordRequest.OldPassword);
+
+        if (!isCorrect)
+            return BadRequest(new RegistrationResponse
+                {
+                    Result = false,
+                    Message = I18n.Get("invalid_old_password")
+                }
+            );
+
+        var result = await _userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword,
+            changePasswordRequest.NewPassword);
+
+        if (!result.Succeeded)
+            return BadRequest(new MessageResponse
+            {
+                Success = false,
+                Message = I18n.Get("password_change_failed")
+            });
+
+        return Ok(new MessageResponse
+        {
+            Success = true,
+            Message = I18n.Get("password_changed")
+        });
+    }
+
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()
@@ -113,10 +180,10 @@ public class AuthController : ControllerBase
     public IActionResult GetById(Guid id)
     {
         var user = _context.Users.FirstOrDefault(e => e.Id == id);
-        
+
         if (user == null)
             return NotFound();
-        
+
         return Ok(UserDto.FromUser(user));
     }
 
@@ -133,7 +200,7 @@ public class AuthController : ControllerBase
         var result = _userManager.AddToRoleAsync(user, role).Result;
         return Ok(result);
     }
-    
+
     private string GenerateJwtToken(User user, IEnumerable<string>? roles)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();

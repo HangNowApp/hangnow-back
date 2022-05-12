@@ -4,8 +4,8 @@ namespace hangnow_back.Hubs;
 
 public class OfferHub : Hub
 {
-    public void Send(string name, string message, string connId)  
+    public void Send(string name, string message, string connId)
     {
-        Clients.Client(connId).SendAsync("Message", name, message);    
+        Clients.Client(connId).SendAsync("Message", name, message);
     }
 }
