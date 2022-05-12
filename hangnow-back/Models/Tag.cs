@@ -8,7 +8,7 @@ public class Tag
     
     [MaxLength(20)]
     [MinLength(2)]
-    [Microsoft.Build.Framework.Required]
+    [Required]
     public string Name { get; set; }
     
     public Guid CreatorId { get; set; }
