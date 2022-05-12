@@ -14,7 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace hangnow_back.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly Context _context;

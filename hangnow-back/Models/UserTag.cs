@@ -4,7 +4,7 @@ namespace hangnow_back.Models;
 
 public class UserTag
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required] public Guid UserId { get; set; }
 

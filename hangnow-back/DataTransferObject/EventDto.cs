@@ -1,3 +1,4 @@
+using hangnow_back.DataTransferObject;
 using hangnow_back.Models;
 
 namespace hangnow_back;
@@ -16,7 +17,7 @@ public class EventDto
 
     public User? Owner { get; set; }
 
-    public List<Tag> Tags { get; set; }
+    public List<TagDto> Tags { get; set; }
     public List<UserEventDto>? Users { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -34,7 +35,7 @@ public class EventListDto
     public DateTime? EndDate { get; set; }
 
     public List<UserEventDto>? Users { get; set; }
-    public List<Tag> Tags { get; set; }
+    public List<TagDto> Tags { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

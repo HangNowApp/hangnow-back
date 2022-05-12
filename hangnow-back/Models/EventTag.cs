@@ -4,7 +4,7 @@ namespace hangnow_back.Models;
 
 public class EventTag
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required] public Guid EventId { get; set; }
 

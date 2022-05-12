@@ -33,7 +33,11 @@ public class EventManager
                     UserName = p.User.UserName,
                     AvatarUrl = p.User.AvatarUrl
                 }).ToList(),
-                Tags = e.EventTags.Select(p => p.Tag).ToList(),
+                Tags = e.EventTags.Select(p => new TagDto
+                {
+                    Name = p.Tag.Name,
+                    Id = p.Tag.Id
+                }).ToList(),
 
                 CreatedAt = e.CreatedAt
             }).ToListAsync();
@@ -59,7 +63,11 @@ public class EventManager
                 UserName = p.User.UserName,
                 AvatarUrl = p.User.AvatarUrl
             }).ToList(),
-            Tags = e.EventTags.Select(p => p.Tag).ToList(),
+            Tags = e.EventTags.Select(p => new TagDto
+            {
+                Name = p.Tag.Name,
+                Id = p.Tag.Id
+            }).ToList(),
 
             CreatedAt = e.CreatedAt
         }).FirstOrDefaultAsync(e => e.Id == id);

@@ -4,7 +4,7 @@ namespace hangnow_back.Models;
 
 public class Tag
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [MaxLength(20)]
     [MinLength(2)]

@@ -4,7 +4,7 @@ namespace hangnow_back.Models;
 
 public class Event
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public Guid Id { get; set; } = Guid.NewGuid();
 
     [MinLength(2)]
     [MaxLength(50)]

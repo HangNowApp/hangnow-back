@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hangnow_back.Models;
 
@@ -10,9 +11,10 @@ using hangnow_back.Models;
 namespace hangnow_back.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20220512101445_UpdateSomeColumn")]
+    partial class UpdateSomeColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
@@ -53,7 +55,7 @@ namespace hangnow_back.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.EventTag", b =>
@@ -77,7 +79,7 @@ namespace hangnow_back.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("EventTags", (string)null);
+                    b.ToTable("EventTags");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.Participant", b =>
@@ -101,7 +103,7 @@ namespace hangnow_back.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Participants", (string)null);
+                    b.ToTable("Participants");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.Tag", b =>
@@ -125,7 +127,7 @@ namespace hangnow_back.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.User", b =>
@@ -138,6 +140,7 @@ namespace hangnow_back.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AvatarUrl")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -155,12 +158,14 @@ namespace hangnow_back.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
@@ -229,7 +234,7 @@ namespace hangnow_back.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTags", (string)null);
+                    b.ToTable("UserTags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
