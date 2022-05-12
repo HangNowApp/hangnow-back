@@ -13,8 +13,8 @@ namespace hangnow_back.Controllers;
 public class EventController : ControllerBase
 {
     private readonly Context _context;
-    private readonly UserManager<User> _userManager;
     private readonly EventManager _eventManager;
+    private readonly UserManager<User> _userManager;
 
     public EventController(Context context, EventManager eventManager, UserManager<User> userManager)
     {
@@ -36,7 +36,7 @@ public class EventController : ControllerBase
     {
         return await _eventManager.GetEvent(id);
     }
-    
+
     // POST: api/event/5/join
     [HttpPost("{id:guid}/join")]
     [Authorize]
@@ -45,7 +45,7 @@ public class EventController : ControllerBase
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.JoinEvent(id, user);
     }
-    
+
     // POST: api/event/5/join
     [HttpDelete("{id:guid}/leave")]
     [Authorize]

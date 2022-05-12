@@ -28,7 +28,7 @@ public class EventManager
                 StartDate = e.StartDate,
                 EndDate = e.EndDate,
 
-                Users = e.Participants.Select(p => new UserEventDto()
+                Users = e.Participants.Select(p => new UserEventDto
                 {
                     UserName = p.User.UserName,
                     AvatarUrl = p.User.AvatarUrl
@@ -54,7 +54,7 @@ public class EventManager
             StartDate = e.StartDate,
             EndDate = e.EndDate,
 
-            Users = e.Participants.Select(p => new UserEventDto()
+            Users = e.Participants.Select(p => new UserEventDto
             {
                 UserName = p.User.UserName,
                 AvatarUrl = p.User.AvatarUrl
@@ -63,7 +63,6 @@ public class EventManager
 
             CreatedAt = e.CreatedAt
         }).FirstOrDefaultAsync(e => e.Id == id);
-
     }
 
     public IIncludableQueryable<Event, Tag> GetEvent()
@@ -92,13 +91,11 @@ public class EventManager
         var participant =
             await _context.Participants.FirstOrDefaultAsync(p => p.UserId == user.Id && p.EventId == eventId);
         if (participant == null)
-        {
             return new MessageResponse
             {
                 Success = false,
                 Message = "You are not a participant of this event"
             };
-        }
 
         _context.Participants.Remove(participant);
         await _context.SaveChangesAsync();

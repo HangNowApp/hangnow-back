@@ -12,7 +12,7 @@ public class UserDto
 
     public string PhoneNumber { get; set; }
     public bool IsPremium { get; set; }
-    
+
     public static UserDto FromUser(User user)
     {
         return new UserDto
@@ -26,10 +26,10 @@ public class UserDto
             AvatarUrl = user.AvatarUrl
         };
     }
-    
 }
 
-public class UserEventDto {
+public class UserEventDto
+{
     public string UserName { get; set; }
     public string AvatarUrl { get; set; }
 }
