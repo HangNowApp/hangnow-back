@@ -112,7 +112,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("change_password")]
+    [HttpPatch("change_password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -138,10 +138,11 @@ public class AuthController : ControllerBase
             changePasswordRequest.NewPassword);
 
         if (!result.Succeeded)
+            
             return BadRequest(new MessageResponse
             {
                 Success = false,
-                Message = I18n.Get("password_change_failed")
+                Message = string.Join(Environment.NewLine, result.Errors.Select(e => e.Description).ToList())
             });
 
         return Ok(new MessageResponse
