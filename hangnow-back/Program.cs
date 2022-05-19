@@ -26,7 +26,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<TagManager>();
 
 builder.Services.AddDbContext<Context>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));
+    options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty)
+        .EnableSensitiveDataLogging()
+        .EnableDetailedErrors());
 
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { })
     .AddEntityFrameworkStores<Context>();

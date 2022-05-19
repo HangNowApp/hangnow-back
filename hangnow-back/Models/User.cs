@@ -10,8 +10,10 @@ public class User : IdentityUser<Guid>
 
     public bool IsPremium { get; set; } = false;
 
-    public ICollection<UserTag> Tags { get; set; }
-    public ICollection<Participant> Events { get; set; }
+    public List<Tag> Tags { get; set; }
+    public List<Tag> CreatedTags { get; set; }
+    public List<Event> OwnerEvents { get; set; }
+    public List<Event> Participations { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

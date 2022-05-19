@@ -4,7 +4,7 @@ namespace hangnow_back.Models;
 
 public class Tag
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    [Key] public Guid Id { get; set; }
 
     [MaxLength(20)]
     [MinLength(2)]
@@ -13,6 +13,9 @@ public class Tag
 
     public Guid CreatorId { get; set; }
     public User Creator { get; set; }
+    
+    public List<Event> Events { get; set; }
+    public List<User> Users { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

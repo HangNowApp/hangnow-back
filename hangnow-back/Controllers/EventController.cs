@@ -26,7 +26,7 @@ public class EventController : ControllerBase
 
     // GET: api/event
     [HttpGet]
-    public async Task<List<EventListDto>> Index([FromQuery] Guid? tagId) // add params tagId: Guid
+    public async Task<List<EventListDto>> Index([FromQuery] string? tagId) // add params tagId: Guid
     {
         return await _eventManager.GetEventList(tagId);
     }
@@ -65,20 +65,6 @@ public class EventController : ControllerBase
     {
         // value.OwnerId = HttpContext.User.GetId();
         var newEvent = await _eventManager.CreateEvent(value);
-        
-        await _context.SaveChangesAsync();
-        
-        // TODO: Create eventcreatedto and link tags to our new event
-        foreach (var tag in value.Tags)
-        {
-            _context.EventTags.Add(new EventTag {
-                EventId = newEvent.Id,
-                TagId = tag
-            });
-        }
-
-        await _context.SaveChangesAsync();
-        
         return newEvent;
     }
 

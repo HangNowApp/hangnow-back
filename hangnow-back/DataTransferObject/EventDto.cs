@@ -51,6 +51,6 @@ public class EventCreateDto
     public Guid? OwnerId { get; set; }
 
     //public List<UserEventDto>? Users { get; set; }
-    public IEnumerable<Guid> Tags { get; set; }
+    public List<string> Tags { get; set; }
     
 }
