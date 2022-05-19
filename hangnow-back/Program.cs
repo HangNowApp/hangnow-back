@@ -22,6 +22,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 );
 
 builder.Services.AddTransient<EventManager>();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));
@@ -73,12 +74,18 @@ using (var scope = app.Services.CreateScope())
 }
 
 if (builder.Environment.IsDevelopment())
+{
     app.UseCors(corsSettings => corsSettings
         .AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader());
-else
+    app.UseSwagger();
+    app.UseSwaggerUI();
+} 
+else 
+{
     app.UseCors(corsSettings => corsSettings.WithOrigins("https://mon-front.com"));
+}
 
 // custom jwt auth middleware
 

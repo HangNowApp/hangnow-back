@@ -34,8 +34,21 @@ public class EventListDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 
-    public List<UserEventDto>? Users { get; set; }
-    public List<TagDto> Tags { get; set; }
+    public IEnumerable<UserEventDto> Users { get; set; }
+    public IEnumerable<TagDto> Tags { get; set; }
 
     public DateTime CreatedAt { get; set; }
+}
+
+public class EventCreateDto
+{
+    public Guid Id { get; set; }
+
+    public string Name { get; set; }
+    public string? Location { get; set; }
+    public string? ImageUrl { get; set; }
+
+    //public List<UserEventDto>? Users { get; set; }
+    public List<TagDto> Tags { get; set; }
+    
 }
