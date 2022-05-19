@@ -62,7 +62,7 @@ public class AuthController : ControllerBase
             return BadRequest(new RegistrationResponse
             {
                 Result = false,
-                Message = I18n.Get("invalid_auth_request")
+                Message = I18n.Get("user_not_found")
             });
 
         var isCorrect = await _userManager.CheckPasswordAsync(existingUser, user.Password);

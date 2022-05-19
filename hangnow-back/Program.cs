@@ -23,6 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 builder.Services.AddTransient<EventManager>();
 builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<TagManager>();
 
 builder.Services.AddDbContext<Context>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("App") ?? string.Empty));

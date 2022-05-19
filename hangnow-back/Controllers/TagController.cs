@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using hangnow_back.Authentications;
+using hangnow_back.DataTransferObject;
+using hangnow_back.Manager;
 using hangnow_back.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +14,14 @@ namespace hangnow_back.Controllers;
 public class TagController : ControllerBase
 {
     private readonly Context _context;
+    private readonly TagManager _tagManager;
+    private readonly UserManager<User> _userManager;
 
-    public TagController(Context context)
+    public TagController(Context context, TagManager tagManager, UserManager<User> userManager)
     {
         _context = context;
+        _tagManager = tagManager;
+        _userManager = userManager;
     }
 
     // GET: api/Tag
@@ -28,23 +32,27 @@ public class TagController : ControllerBase
     }
 
     // GET: api/Tag/5
-    [HttpGet("{id}", Name = "Get")]
-    public string Get(int id)
+    [HttpGet("{id:Guid}", Name = "Get")]
+    public async Task<Tag?> Get(Guid id)
     {
-        return null;
+        return await _tagManager.GetTag(id);
     }
 
     // POST: api/Tag
+    [Authorize]
     [HttpPost]
-    public void Post([FromBody] string value)
+    public async Task<Tag?> Post([FromBody] CreateTagDto value)
     {
+        var tag = await _tagManager.CreateTag(value.Name, HttpContext.User.GetId());
+        return tag;
     }
 
     // PUT: api/Tag/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
-    {
-    }
+    // [Authorize]
+    // [HttpPut("{id:Guid}")]
+    // public void Put(Guid id, [FromBody] string value)
+    // {
+    // }
 
     // DELETE: api/Tag/5
     [HttpDelete("{id}")]
