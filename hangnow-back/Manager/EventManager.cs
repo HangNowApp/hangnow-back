@@ -54,6 +54,7 @@ public class EventManager
             Name = body.Name,
             Location = body.Location,
             ImageUrl = body.ImageUrl,
+            OwnerId = body.OwnerId,
         });
         
         await _context.SaveChangesAsync();

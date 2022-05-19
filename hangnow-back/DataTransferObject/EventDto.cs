@@ -47,8 +47,10 @@ public class EventCreateDto
     public string Name { get; set; }
     public string? Location { get; set; }
     public string? ImageUrl { get; set; }
+    
+    public Guid? OwnerId { get; set; }
 
     //public List<UserEventDto>? Users { get; set; }
-    public List<TagDto> Tags { get; set; }
+    public List<Guid> Tags { get; set; }
     
 }

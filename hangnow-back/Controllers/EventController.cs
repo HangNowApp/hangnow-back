@@ -72,11 +72,12 @@ public class EventController : ControllerBase
         {
             _context.EventTags.Add(new EventTag {
                 EventId = newEvent.Id,
-                TagId = tag.Id
+                TagId = tag
             });
         }
-        
+
         await _context.SaveChangesAsync();
+        
         return newEvent;
     }
 
