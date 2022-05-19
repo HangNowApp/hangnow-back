@@ -104,11 +104,7 @@ public class AuthController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return Ok(new MessageResponse
-        {
-            Success = true,
-            Message = I18n.Get("user_updated")
-        });
+        return new OkObjectResult(UserDto.FromUser(user));
     }
 
     [Authorize]
