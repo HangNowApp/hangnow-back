@@ -5,6 +5,7 @@ using hangnow_back.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hangnow_back.Controllers;
 
@@ -83,14 +84,45 @@ public class EventController : ControllerBase
 
     // PUT: api/Event/5
     [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    public async void Put(Guid id, [FromBody] EventCreateDto value)
     {
+        var targetEvent = await _context.Events.SingleOrDefaultAsync(tEvent => tEvent.Id == id);
+
+        targetEvent.Name = value.Name;
+        targetEvent.Location = value.Location;
+        targetEvent.ImageUrl = value.ImageUrl;
+        targetEvent.OwnerId = value.OwnerId;
         
+        await _context.SaveChangesAsync();
+
+        var relatedTags = await _context.EventTags.Where(tEvent => tEvent.EventId == id).ToListAsync();
+        var newTags = value.Tags.Except(relatedTags.Select(tEvent => tEvent.TagId));
+        var oldTags = relatedTags.Select(tEvent => tEvent.TagId).Except(value.Tags);
+        
+        foreach (var tag in oldTags)
+        {
+            _context.EventTags.Remove(relatedTags.Single(tEvent => tEvent.TagId == tag));
+        }
+        
+        foreach (var tag in newTags)
+        {
+            _context.EventTags.Add(new EventTag {
+                EventId = id,
+                TagId = tag
+            });
+        }
+        
+        await _context.SaveChangesAsync();
     }
 
     // DELETE: api/Event/5
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public void Delete(Guid id)
     {
+        // Delete event and all related tags
+        var relatedTags = _context.EventTags.Where(tEvent => tEvent.EventId == id);
+        _context.EventTags.RemoveRange(relatedTags);
+        _context.Events.Remove(new Event { Id = id });
+        _context.SaveChanges();
     }
 }
