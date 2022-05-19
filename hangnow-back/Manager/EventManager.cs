@@ -14,9 +14,12 @@ public class EventManager
         _context = context;
     }
 
-    public async Task<List<EventListDto>> GetEventList()
+    public async Task<List<EventListDto>> GetEventList(Guid? tagId = null)
     {
-        return await GetEvent().Select(e =>
+        return await GetEvent().Where(e => 
+                tagId == null || e.EventTags.Any(t => t.TagId.ToString() == tagId.ToString()
+                ))
+            .Select(e =>
             new EventListDto
             {
                 Id = e.Id,
@@ -32,15 +35,16 @@ public class EventManager
                 {
                     UserName = p.User.UserName,
                     AvatarUrl = p.User.AvatarUrl
-                }).ToList(),
+                }),
+
                 Tags = e.EventTags.Select(p => new TagDto
                 {
                     Name = p.Tag.Name,
                     Id = p.Tag.Id
-                }).ToList(),
-
+                }),
                 CreatedAt = e.CreatedAt
-            }).ToListAsync();
+            })
+            .ToListAsync();
     }
 
     public async Task<EventDto?> GetEvent(Guid id)

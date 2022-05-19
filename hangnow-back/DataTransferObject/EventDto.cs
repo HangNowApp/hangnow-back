@@ -34,8 +34,8 @@ public class EventListDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 
-    public List<UserEventDto>? Users { get; set; }
-    public List<TagDto> Tags { get; set; }
+    public IEnumerable<UserEventDto> Users { get; set; }
+    public IEnumerable<TagDto> Tags { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }
