@@ -86,7 +86,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("update")]
+    [HttpPatch("update")]
     public async Task<IActionResult> Update([FromBody] UpdateUserRequest updateRequest)
     {
         var user = await _userManager.GetUserAsync(User);
