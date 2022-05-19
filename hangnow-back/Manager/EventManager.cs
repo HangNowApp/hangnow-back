@@ -42,6 +42,20 @@ public class EventManager
                 CreatedAt = e.CreatedAt
             }).ToListAsync();
     }
+    
+    public async Task<Event> CreateEvent(EventCreateDto body)
+    {
+        var newEvent = _context.Events.Add(new Event
+        {
+            Name = body.Name,
+            Location = body.Location,
+            ImageUrl = body.ImageUrl,
+        });
+        
+        await _context.SaveChangesAsync();
+
+        return newEvent.Entity;
+    }
 
     public async Task<EventDto?> GetEvent(Guid id)
     {

@@ -54,22 +54,37 @@ public class EventController : ControllerBase
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.LeaveEvent(id, user);
     }
+    
+    // { nane: "fewjewfwfe", tags: ["idddd", "ididddd"] }
 
     // POST: api/event
     [Authorize]
     [HttpPost]
-    public async Task<Event> Post([FromBody] Event value)
+    public async Task<Event> Post([FromBody] EventCreateDto value)
     {
-        value.OwnerId = HttpContext.User.GetId();
-        var newEvent = _context.Events.Add(value);
+        // value.OwnerId = HttpContext.User.GetId();
+        var newEvent = await _eventManager.CreateEvent(value);
+        
         await _context.SaveChangesAsync();
-        return newEvent.Entity;
+        
+        // TODO: Create eventcreatedto and link tags to our new event
+        foreach (var tag in value.Tags)
+        {
+            _context.EventTags.Add(new EventTag {
+                EventId = newEvent.Id,
+                TagId = tag.Id
+            });
+        }
+        
+        await _context.SaveChangesAsync();
+        return newEvent;
     }
 
     // PUT: api/Event/5
     [HttpPut("{id}")]
     public void Put(int id, [FromBody] string value)
     {
+        
     }
 
     // DELETE: api/Event/5
