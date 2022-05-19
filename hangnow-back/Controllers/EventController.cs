@@ -84,16 +84,9 @@ public class EventController : ControllerBase
 
     // PUT: api/Event/5
     [HttpPut("{id}")]
-    public async void Put(Guid id, [FromBody] EventCreateDto value)
+    public async Task<Event> Put(Guid id, [FromBody] EventCreateDto value)
     {
-        var targetEvent = await _context.Events.SingleOrDefaultAsync(tEvent => tEvent.Id == id);
-
-        targetEvent.Name = value.Name;
-        targetEvent.Location = value.Location;
-        targetEvent.ImageUrl = value.ImageUrl;
-        targetEvent.OwnerId = value.OwnerId;
-        
-        await _context.SaveChangesAsync();
+        var targetEvent = await _eventManager.EditEvent(id, value);
 
         var relatedTags = await _context.EventTags.Where(tEvent => tEvent.EventId == id).ToListAsync();
         var newTags = value.Tags.Except(relatedTags.Select(tEvent => tEvent.TagId));
@@ -104,15 +97,11 @@ public class EventController : ControllerBase
             _context.EventTags.Remove(relatedTags.Single(tEvent => tEvent.TagId == tag));
         }
         
-        foreach (var tag in newTags)
-        {
-            _context.EventTags.Add(new EventTag {
-                EventId = id,
-                TagId = tag
-            });
-        }
-        
+        _eventManager.LinkTags(id, newTags);
+
         await _context.SaveChangesAsync();
+
+        return targetEvent;
     }
 
     // DELETE: api/Event/5

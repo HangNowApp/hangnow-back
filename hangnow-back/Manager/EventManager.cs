@@ -62,6 +62,32 @@ public class EventManager
         return newEvent.Entity;
     }
 
+    public async Task<Event> EditEvent(Guid id, EventCreateDto body)
+    {
+        var targetEvent = await _context.Events.SingleOrDefaultAsync(tEvent => tEvent.Id == id);
+
+        targetEvent.Name = body.Name;
+        targetEvent.Location = body.Location;
+        targetEvent.ImageUrl = body.ImageUrl;
+        targetEvent.OwnerId = body.OwnerId;
+
+        await _context.SaveChangesAsync();
+
+        return targetEvent;
+    }
+
+    public async void LinkTags(Guid id, IEnumerable<Guid> tags)
+    {
+        foreach (var tag in tags)
+        {
+            _context.EventTags.Add(new EventTag {
+                EventId = id,
+                TagId = tag
+            });
+        }
+        
+        await _context.SaveChangesAsync();
+    }
     public async Task<EventDto?> GetEvent(Guid id)
     {
         return await GetEvent().Select(e => new EventDto
