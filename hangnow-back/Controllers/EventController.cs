@@ -25,9 +25,9 @@ public class EventController : ControllerBase
 
     // GET: api/event
     [HttpGet]
-    public async Task<List<EventListDto>> Get()
+    public async Task<List<EventListDto>> Index([FromQuery] Guid? tagId) // add params tagId: Guid
     {
-        return await _eventManager.GetEventList();
+        return await _eventManager.GetEventList(tagId);
     }
 
     // GET: api/event/5

@@ -31,5 +31,5 @@ public class UserDto
 public class UserEventDto
 {
     public string UserName { get; set; }
-    public string AvatarUrl { get; set; }
+    public string? AvatarUrl { get; set; }
 }
