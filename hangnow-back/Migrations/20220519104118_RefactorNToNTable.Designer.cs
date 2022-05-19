@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hangnow_back.Models;
 
@@ -10,9 +11,10 @@ using hangnow_back.Models;
 namespace hangnow_back.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20220519104118_RefactorNToNTable")]
+    partial class RefactorNToNTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
@@ -34,13 +36,13 @@ namespace hangnow_back.Migrations
 
             modelBuilder.Entity("EventUser", b =>
                 {
-                    b.Property<Guid>("ParticipantsId")
+                    b.Property<Guid>("ParticipansId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ParticipationsId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("ParticipantsId", "ParticipationsId");
+                    b.HasKey("ParticipansId", "ParticipationsId");
 
                     b.HasIndex("ParticipationsId");
 
@@ -84,6 +86,30 @@ namespace hangnow_back.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("hangnow_back.Models.Participant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Participants");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.Tag", b =>
@@ -350,7 +376,7 @@ namespace hangnow_back.Migrations
                 {
                     b.HasOne("hangnow_back.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("ParticipantsId")
+                        .HasForeignKey("ParticipansId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -368,6 +394,25 @@ namespace hangnow_back.Migrations
                         .HasForeignKey("OwnerId");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("hangnow_back.Models.Participant", b =>
+                {
+                    b.HasOne("hangnow_back.Models.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("hangnow_back.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("hangnow_back.Models.Tag", b =>
