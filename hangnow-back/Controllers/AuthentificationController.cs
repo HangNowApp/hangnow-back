@@ -172,7 +172,6 @@ public class AuthController : ControllerBase
         return Ok(user);
     }
 
-    [Authorize(Policy = "Admin")]
     [HttpGet("{id:guid}")]
     public IActionResult GetById(Guid id)
     {
