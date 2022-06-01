@@ -107,8 +107,8 @@ public class EventManager
 
     public async Task<EventDto?> JoinEvent(Guid eventId, User user)
     {
-        var customEvent = await _context.Events.FindAsync(eventId);
-        customEvent.Participants.Add(user);
+        var appEvent = await _context.Events.FindAsync(eventId);
+        appEvent.Participants.Add(user);
 
         await _context.SaveChangesAsync();
 
