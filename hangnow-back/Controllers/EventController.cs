@@ -86,7 +86,6 @@ public class EventController : ControllerBase
                     Message = "You can only create 2 events, upgrade to premium to create more or delete current event."
                 });
             }
-                
         }
         
         var newEvent = await _eventManager.CreateEvent(value, owner);
@@ -103,10 +102,19 @@ public class EventController : ControllerBase
 
     // DELETE: api/Event/5
     [HttpDelete("{id:int}")]
-    public async Task<MessageResponse> Delete(int id)
+    public async Task<ActionResult<MessageResponse>> Delete(int id)
     {
-
+        var userId = HttpContext.User.GetId();
         var appEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+
+        if (appEvent.OwnerId != userId)
+            return new UnauthorizedObjectResult(
+                new MessageResponse
+                {
+                    Success = false,
+                    Message = "You are not the owner of this event"
+                });
+        
         appEvent.Tags.Clear();
         _context.Events.Remove(appEvent);
 

@@ -15,7 +15,7 @@ public class EventDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 
-    public User? Owner { get; set; }
+    public UserEventDto? Owner { get; set; }
 
     public List<TagDto> Tags { get; set; }
     public List<UserEventDto>? Users { get; set; }

@@ -42,7 +42,7 @@ public class EventManager
             Location = body.Location,
             Description = body.Description,
             ImageUrl = body.ImageUrl,
-            OwnerId = body.OwnerId,
+            OwnerId = owner.Id,
             Tags = tags,
             Users = new List<User> { owner }
         };
@@ -81,7 +81,12 @@ public class EventManager
             Location = e.Location,
             ImageUrl = e.ImageUrl,
             Description = e.Description,
-            Owner = e.Owner,
+            Owner = new UserEventDto
+            {
+                AvatarUrl = e.Owner.AvatarUrl,
+                Id = e.Owner.Id,
+                UserName = e.Owner.UserName
+            },
         
             StartDate = e.StartDate,
             EndDate = e.EndDate,
@@ -164,7 +169,7 @@ public class EventManager
             .Include(e => e.Users)
             .SingleOrDefaultAsync(e => e.Id.ToString() == eventId.ToString());
 
-        if (appEvent == null)
+        if (appEvent?.OwnerId == user.Id)
             return null;
 
         _context.Database.ExecuteSqlRaw("DELETE FROM \"EventUser\" WHERE \"UsersId\" = {0} AND \"EventsId\" = {1}", 
