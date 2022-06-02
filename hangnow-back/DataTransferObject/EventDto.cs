@@ -5,7 +5,7 @@ namespace hangnow_back;
 
 public class EventDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
     public string? Description { get; set; }
@@ -25,11 +25,12 @@ public class EventDto
 
 public class EventListDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
     public string? Location { get; set; }
     public string? ImageUrl { get; set; }
+    public int? OwnerId { get; set; }
 
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
@@ -42,13 +43,13 @@ public class EventListDto
 
 public class EventCreateDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
     public string? Location { get; set; }
     public string? ImageUrl { get; set; }
     
-    public Guid? OwnerId { get; set; }
+    public int? OwnerId { get; set; }
 
     //public List<UserEventDto>? Users { get; set; }
     public List<string> Tags { get; set; }

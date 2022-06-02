@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest user)
     {
-        var existingUser = await _userManager.FindByEmailAsync(user.Email);
+        var existingUser = await _userManager.FindByEmailAsync(user.Email) ?? await _userManager.FindByNameAsync(user.Email);
 
         if (existingUser == null)
             return BadRequest(new RegistrationResponse
@@ -172,8 +172,8 @@ public class AuthController : ControllerBase
         return Ok(user);
     }
 
-    [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id)
+    [HttpGet("{id:int}")]
+    public IActionResult GetById(int id)
     {
         var user = _context.Users.FirstOrDefault(e => e.Id == id);
 
@@ -185,8 +185,8 @@ public class AuthController : ControllerBase
 
     // controller to add admin to a role
     [Authorize(Policy = "Admin")]
-    [HttpPost("{id:guid}/{role}")]
-    public IActionResult AddToRole(Guid id, string role)
+    [HttpPost("{id:int}/{role}")]
+    public IActionResult AddToRole(int id, string role)
     {
         var user = _context.Users.FirstOrDefault(e => e.Id == id);
 

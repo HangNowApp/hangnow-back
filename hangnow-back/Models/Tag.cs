@@ -4,14 +4,14 @@ namespace hangnow_back.Models;
 
 public class Tag
 {
-    [Key] public Guid Id { get; set; }
+    [Key] public int Id { get; set; }
 
     [MaxLength(20)]
     [MinLength(2)]
     [Required]
     public string Name { get; set; }
 
-    public Guid CreatorId { get; set; }
+    public int CreatorId { get; set; }
     public User Creator { get; set; }
     
     public List<Event> Events { get; set; }

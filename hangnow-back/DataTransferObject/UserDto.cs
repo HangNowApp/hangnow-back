@@ -4,7 +4,7 @@ namespace hangnow_back;
 
 public class UserDto
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public string UserName { get; set; }
     public string NormalizedUserName { get; set; }
     public string Email { get; set; }
@@ -30,6 +30,7 @@ public class UserDto
 
 public class UserEventDto
 {
+    public int Id { get; set; }
     public string UserName { get; set; }
     public string? AvatarUrl { get; set; }
 }

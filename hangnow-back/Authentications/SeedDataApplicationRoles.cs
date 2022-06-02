@@ -4,12 +4,12 @@ namespace hangnow_back.Authentications;
 
 public static class SeedDataApplicationRoles
 {
-    public static void SeedRoles(RoleManager<IdentityRole<Guid>> roleManager)
+    public static void SeedRoles(RoleManager<IdentityRole<int>> roleManager)
     {
         foreach (var role in new[] {Roles.Admin, Roles.User, Roles.PremiumUser})
         {
             var result = roleManager.RoleExistsAsync(role).Result;
-            if (!result) roleManager.CreateAsync(new IdentityRole<Guid>(role));
+            if (!result) roleManager.CreateAsync(new IdentityRole<int>(role));
         }
     }
 }
