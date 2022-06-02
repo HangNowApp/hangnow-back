@@ -63,7 +63,7 @@ public class EventController : ControllerBase
     [HttpPost]
     public async Task<Event> Post([FromBody] EventCreateDto value)
     {
-        // value.OwnerId = HttpContext.User.GetId();
+        value.OwnerId = HttpContext.User.GetId();
         var newEvent = await _eventManager.CreateEvent(value);
         return newEvent;
     }

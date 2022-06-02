@@ -56,6 +56,7 @@ public class EventManager
             Id = Guid.NewGuid(),
             Name = body.Name,
             Location = body.Location,
+            Description = body.Description,
             ImageUrl = body.ImageUrl,
             OwnerId = body.OwnerId,
             Tags = tags
