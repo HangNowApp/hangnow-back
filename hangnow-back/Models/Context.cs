@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace hangnow_back.Models;
 
-public class Context : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class Context : IdentityDbContext<User, IdentityRole<int>, int>
 {
     public Context(DbContextOptions<Context> options) : base(options)
     {
@@ -21,8 +21,12 @@ public class Context : IdentityDbContext<User, IdentityRole<Guid>, Guid>
         modelBuilder.Entity<Event>().HasOne(u => u.Owner)
             .WithMany(t => t.OwnerEvents)
             .HasForeignKey(u => u.OwnerId);
-        modelBuilder.Entity<Event>().HasMany(e => e.Participants)
-            .WithMany(e => e.Participations);
+        modelBuilder.Entity<Event>().HasMany(e => e.Users)
+            .WithMany(e => e.Events);
+        modelBuilder.Entity<User>().HasMany(u => u.OwnerEvents)
+            .WithOne(u => u.Owner);
+        modelBuilder.Entity<User>().HasMany(u => u.Events)
+            .WithMany(e => e.Users);
 
         modelBuilder.Entity<Tag>().HasOne(u => u.Creator)
             .WithMany(t => t.CreatedTags)

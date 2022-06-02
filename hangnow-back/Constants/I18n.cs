@@ -12,7 +12,10 @@ public class I18n
         {"event_deleted", "Deleted event"},
         {"invalid_old_password", "Invalid old password"},
         {"password_change_failed", "Password change failed"},
-        {"password_changed", "Password changed"}
+        {"password_changed", "Password changed"},
+        {"event_not_found", "Event not found"},
+        {"you_join_event", "You join the event !"},
+        {"you_left_event", "You left the event"}
     };
 
     private static readonly Dictionary<string, Dictionary<string, string>> Translations = new()

@@ -26,31 +26,38 @@ public class EventController : ControllerBase
 
     // GET: api/event
     [HttpGet]
-    public async Task<List<EventListDto>> Index([FromQuery] string? tagId) // add params tagId: Guid
+    public async Task<List<EventListDto>> Index([FromQuery] string? tagId)
     {
         return await _eventManager.GetEventList(tagId);
     }
+    
+    // GET: api/event/user/5
+    [HttpGet("user/{ownerId:int}")]
+    public async Task<List<EventListDto>> EventByOwner(int ownerId)
+    {
+        return await _eventManager.GetEventListByOwner(ownerId);
+    }
 
     // GET: api/event/5
-    [HttpGet("{id:guid}")]
-    public async Task<EventDto?> Get(Guid id)
+    [HttpGet("{id:int}")]
+    public async Task<EventDto?> Get(int id)
     {
         return await _eventManager.GetEvent(id);
     }
 
     // POST: api/event/5/join
-    [HttpPost("{id:guid}/join")]
+    [HttpPatch("{id:int}/join")]
     [Authorize]
-    public async Task<EventDto?> Join(Guid id)
+    public async Task<EventDto?> Join(int id)
     {
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.JoinEvent(id, user);
     }
 
     // POST: api/event/5/join
-    [HttpDelete("{id:guid}/leave")]
+    [HttpDelete("{id:int}/leave")]
     [Authorize]
-    public async Task<MessageResponse?> Leave(Guid id)
+    public async Task<EventDto?> Leave(int id)
     {
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.LeaveEvent(id, user);
@@ -63,8 +70,8 @@ public class EventController : ControllerBase
     [HttpPost]
     public async Task<Event> Post([FromBody] EventCreateDto value)
     {
-        value.OwnerId = HttpContext.User.GetId();
-        var newEvent = await _eventManager.CreateEvent(value);
+        var owner = await HttpContext.User.GetUser(_userManager);
+        var newEvent = await _eventManager.CreateEvent(value, owner);
         return newEvent;
     }
 

@@ -11,12 +11,12 @@ public class TagManager
         _context = context;
     }
     
-    public async Task<Tag?> GetTag(Guid id)
+    public async Task<Tag?> GetTag(int id)
     {
         return await _context.Tags.FindAsync(id);
     }
     
-    public async Task<Tag?> CreateTag(string name, Guid userId) 
+    public async Task<Tag?> CreateTag(string name, int userId) 
     {
         var tag = new Tag
         {
