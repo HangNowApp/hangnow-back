@@ -73,31 +73,20 @@ public class EventController : ControllerBase
     public async Task<Event> Put(Guid id, [FromBody] EventCreateDto value)
     {
         var targetEvent = await _eventManager.EditEvent(id, value);
-
-        var relatedTags = await _context.EventTags.Where(tEvent => tEvent.EventId == id).ToListAsync();
-        var newTags = value.Tags.Except(relatedTags.Select(tEvent => tEvent.TagId));
-        var oldTags = relatedTags.Select(tEvent => tEvent.TagId).Except(value.Tags);
-        
-        foreach (var tag in oldTags)
-        {
-            _context.EventTags.Remove(relatedTags.Single(tEvent => tEvent.TagId == tag));
-        }
-        
-        _eventManager.LinkTags(id, newTags);
-
-        await _context.SaveChangesAsync();
-
         return targetEvent;
     }
 
     // DELETE: api/Event/5
     [HttpDelete("{id}")]
-    public void Delete(Guid id)
+    public async Task<MessageResponse> Delete(Guid id)
     {
-        // Delete event and all related tags
-        var relatedTags = _context.EventTags.Where(tEvent => tEvent.EventId == id);
-        _context.EventTags.RemoveRange(relatedTags);
-        _context.Events.Remove(new Event { Id = id });
-        _context.SaveChanges();
+
+        var targetEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+        targetEvent.Tags.Clear();
+        _context.Events.Remove(targetEvent);
+
+        _context.SaveChangesAsync();
+        
+        return new MessageResponse() { Message = I18n.Get("event_deleted") };
     }
 }

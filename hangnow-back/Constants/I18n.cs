@@ -9,6 +9,7 @@ public class I18n
         {"user_not_found", "User not found"},
         {"invalid_auth_request", "Invalid authentication request"},
         {"user_updated", "User updated"},
+        {"event_deleted", "Deleted event"},
         {"invalid_old_password", "Invalid old password"},
         {"password_change_failed", "Password change failed"},
         {"password_changed", "Password changed"}
