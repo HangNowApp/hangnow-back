@@ -34,7 +34,7 @@ public class EventManager
     
     public async Task<Event> CreateEvent(EventCreateDto body, User owner)
     {
-        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id)).ToList();
+        var tags = await _context.Tags.Where(e => body.Tags.Contains(e.Id)).ToListAsync();
 
         var newEvent = new Event
         {
@@ -47,11 +47,11 @@ public class EventManager
             Users = new List<User> { owner }
         };
 
-        await _context.Events.AddAsync(newEvent);
+        var entity = await _context.Events.AddAsync(newEvent);
 
         await _context.SaveChangesAsync();
 
-        return newEvent;
+        return entity.Entity;
     }
 
     public async Task<Event> EditEvent(int id, EventCreateDto body)
@@ -60,6 +60,7 @@ public class EventManager
         var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id)).ToList();
         
         appEvent.Name = body.Name;
+        appEvent.Description = body.Description;
         appEvent.Location = body.Location;
         appEvent.ImageUrl = body.ImageUrl;
         appEvent.OwnerId = body.OwnerId;

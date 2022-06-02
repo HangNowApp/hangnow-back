@@ -43,7 +43,7 @@ public class EventListDto
 
 public class EventCreateDto
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
     public string Name { get; set; }
     
