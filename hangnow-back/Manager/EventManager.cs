@@ -46,7 +46,7 @@ public class EventManager
             })
             .ToListAsync();
     }
-    
+
     public async Task<Event> CreateEvent(EventCreateDto body)
     {
         var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id.ToString())).ToList();
@@ -60,12 +60,49 @@ public class EventManager
             OwnerId = body.OwnerId,
             Tags = tags
         };
-        
+
+        await _context.Events.AddAsync(newEvent);
+
         await _context.SaveChangesAsync();
 
         return newEvent;
     }
 
+    public async Task<Event> EditEvent(Guid id, EventCreateDto body)
+    {
+        var targetEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id.ToString())).ToList();
+        
+        targetEvent.Name = body.Name;
+        targetEvent.Location = body.Location;
+        targetEvent.ImageUrl = body.ImageUrl;
+        targetEvent.OwnerId = body.OwnerId;
+        targetEvent.Tags = tags;
+
+        await _context.SaveChangesAsync();
+
+        return targetEvent;
+    }
+
+    public async void LinkTags(Guid eventId, List<string> tags)
+    {
+        var dbTags = _context.Tags.Where(e => tags.Contains(e.Id.ToString())).ToList();
+        var dbEvent = _context.Events.Find(eventId);
+        
+        dbEvent.Tags.AddRange(dbTags);
+        
+        await _context.SaveChangesAsync();
+    }
+    
+    public async void DeleteTags(Guid eventId, List<string> tags)
+    {
+        var dbTags = _context.Tags.Where(e => tags.Contains(e.Id.ToString())).ToList();
+        var dbEvent = _context.Events.Find(eventId);
+        
+        dbEvent.Tags.RemoveAll(e => dbTags.Contains(e));
+
+        await _context.SaveChangesAsync();
+    }
     public async Task<EventDto?> GetEvent(Guid id)
     {
         return await GetEvent().Select(e => new EventDto

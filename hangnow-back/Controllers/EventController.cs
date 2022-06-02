@@ -5,6 +5,7 @@ using hangnow_back.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hangnow_back.Controllers;
 
@@ -69,14 +70,23 @@ public class EventController : ControllerBase
 
     // PUT: api/Event/5
     [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    public async Task<Event> Put(Guid id, [FromBody] EventCreateDto value)
     {
-        
+        var targetEvent = await _eventManager.EditEvent(id, value);
+        return targetEvent;
     }
 
     // DELETE: api/Event/5
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public async Task<MessageResponse> Delete(Guid id)
     {
+
+        var targetEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+        targetEvent.Tags.Clear();
+        _context.Events.Remove(targetEvent);
+
+        _context.SaveChangesAsync();
+        
+        return new MessageResponse() { Message = I18n.Get("event_deleted") };
     }
 }
