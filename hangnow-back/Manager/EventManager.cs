@@ -1,5 +1,7 @@
+using hangnow_back.Authentications;
 using hangnow_back.DataTransferObject;
 using hangnow_back.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
@@ -16,50 +18,33 @@ public class EventManager
 
     public async Task<List<EventListDto>> GetEventList(string? tagId = null)
     {
-        return await GetEvent().Where(e => 
+        return await GetEventListDtos().Where(e => 
                 tagId == null || e.Tags.Any(t => t.Id.ToString() == tagId)
                 )
-            .Select(e =>
-            new EventListDto
-            {
-                Id = e.Id,
-        
-                Name = e.Name,
-                Location = e.Location,
-                ImageUrl = e.ImageUrl,
-        
-                StartDate = e.StartDate,
-                EndDate = e.EndDate,
-        
-                Users = e.Participants.Select(p => new UserEventDto
-                {
-                    UserName = p.UserName,
-                    AvatarUrl = p.AvatarUrl
-                }),
-        
-                Tags = e.Tags.Select(p => new TagDto
-                {
-                    Name = p.Name,
-                    Id = p.Id
-                }),
-                CreatedAt = e.CreatedAt
-            })
             .ToListAsync();
     }
 
-    public async Task<Event> CreateEvent(EventCreateDto body)
+    public async Task<List<EventListDto>> GetEventListByOwner(int ownerId)
     {
-        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id.ToString())).ToList();
+        return await GetEventListDtos()
+            .Where(e => e.OwnerId == ownerId)
+            .ToListAsync();
+
+    }
+    
+    public async Task<Event> CreateEvent(EventCreateDto body, User owner)
+    {
+        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id)).ToList();
 
         var newEvent = new Event
         {
-            Id = Guid.NewGuid(),
             Name = body.Name,
             Location = body.Location,
             Description = body.Description,
             ImageUrl = body.ImageUrl,
             OwnerId = body.OwnerId,
-            Tags = tags
+            Tags = tags,
+            Users = new List<User> { owner }
         };
 
         await _context.Events.AddAsync(newEvent);
@@ -69,42 +54,23 @@ public class EventManager
         return newEvent;
     }
 
-    public async Task<Event> EditEvent(Guid id, EventCreateDto body)
+    public async Task<Event> EditEvent(int id, EventCreateDto body)
     {
-        var targetEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
-        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id.ToString())).ToList();
+        var appEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+        var tags = _context.Tags.Where(e => body.Tags.Contains(e.Id)).ToList();
         
-        targetEvent.Name = body.Name;
-        targetEvent.Location = body.Location;
-        targetEvent.ImageUrl = body.ImageUrl;
-        targetEvent.OwnerId = body.OwnerId;
-        targetEvent.Tags = tags;
+        appEvent.Name = body.Name;
+        appEvent.Location = body.Location;
+        appEvent.ImageUrl = body.ImageUrl;
+        appEvent.OwnerId = body.OwnerId;
+        appEvent.Tags = tags;
 
         await _context.SaveChangesAsync();
 
-        return targetEvent;
-    }
-
-    public async void LinkTags(Guid eventId, List<string> tags)
-    {
-        var dbTags = _context.Tags.Where(e => tags.Contains(e.Id.ToString())).ToList();
-        var dbEvent = _context.Events.Find(eventId);
-        
-        dbEvent.Tags.AddRange(dbTags);
-        
-        await _context.SaveChangesAsync();
+        return appEvent;
     }
     
-    public async void DeleteTags(Guid eventId, List<string> tags)
-    {
-        var dbTags = _context.Tags.Where(e => tags.Contains(e.Id.ToString())).ToList();
-        var dbEvent = _context.Events.Find(eventId);
-        
-        dbEvent.Tags.RemoveAll(e => dbTags.Contains(e));
-
-        await _context.SaveChangesAsync();
-    }
-    public async Task<EventDto?> GetEvent(Guid id)
+    public async Task<EventDto?> GetEvent(int id)
     {
         return await GetEvent().Select(e => new EventDto
         {
@@ -120,8 +86,9 @@ public class EventManager
             EndDate = e.EndDate,
             // Participants
             // Participants
-            Users = e.Participants.Select(p => new UserEventDto
+            Users = e.Users.Select(p => new UserEventDto
             {
+                Id = p.Id,
                 UserName = p.UserName,
                 AvatarUrl = p.AvatarUrl
             }).ToList(),
@@ -139,39 +106,71 @@ public class EventManager
     {
         return _context.Events
             .Include(e => e.Owner)
-            .Include(e => e.Participants)
+            .Include(e => e.Users)
             .Include(e => e.Tags);
     }
 
-    public async Task<EventDto?> JoinEvent(Guid eventId, User user)
+    public IQueryable<EventListDto> GetEventListDtos()
     {
-        var appEvent = await _context.Events.FindAsync(eventId);
-        appEvent.Participants.Add(user);
+        return GetEvent().Select(e =>
+            new EventListDto
+            {
+                Id = e.Id,
+
+                Name = e.Name,
+                Location = e.Location,
+                ImageUrl = e.ImageUrl,
+                OwnerId = e.OwnerId,
+
+                StartDate = e.StartDate,
+                EndDate = e.EndDate,
+
+                Users = e.Users.Select(p => new UserEventDto
+                {
+                    Id = p.Id,
+                    UserName = p.UserName,
+                    AvatarUrl = p.AvatarUrl
+                }),
+
+                Tags = e.Tags.Select(p => new TagDto
+                {
+                    Name = p.Name,
+                    Id = p.Id
+                }),
+                CreatedAt = e.CreatedAt
+            });
+    }
+
+    public async Task<EventDto?> JoinEvent(int eventId, User user)
+    {
+        var appEvent = await _context.Events
+            .Include(e => e.Users)
+            .SingleOrDefaultAsync(e => e.Id.ToString() == eventId.ToString());
+        
+        if (appEvent == null)
+            return null;
+        
+        appEvent.Users.Add(user);
 
         await _context.SaveChangesAsync();
 
         return await GetEvent(eventId);
     }
 
-    public async Task<MessageResponse> LeaveEvent(Guid eventId, User user)
+    public async Task<EventDto?> LeaveEvent(int eventId, User user)
     {
-        var customEvent = await _context.Events.FindAsync(eventId);
-        
-        if (customEvent == null)
-            return new MessageResponse
-            {
-                Success = false,
-                Message = "No event founded"
-            };
-        
-        customEvent.Participants.Remove(user);
-        
+        var appEvent = await _context.Events
+            .Include(e => e.Users)
+            .SingleOrDefaultAsync(e => e.Id.ToString() == eventId.ToString());
+
+        if (appEvent == null)
+            return null;
+
+        _context.Database.ExecuteSqlRaw("DELETE FROM \"EventUser\" WHERE \"UsersId\" = {0} AND \"EventsId\" = {1}", 
+            user.Id.ToString().ToUpper(), eventId.ToString().ToUpper());
+
         await _context.SaveChangesAsync();
 
-        return new MessageResponse
-        {
-            Success = true,
-            Message = "You have left the event"
-        };
+        return await GetEvent(eventId);
     }
 }

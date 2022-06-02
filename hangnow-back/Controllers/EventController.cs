@@ -68,31 +68,49 @@ public class EventController : ControllerBase
     // POST: api/event
     [Authorize]
     [HttpPost]
-    public async Task<Event> Post([FromBody] EventCreateDto value)
+    public async Task<ActionResult<Event>> Post([FromBody] EventCreateDto value)
     {
         var owner = await HttpContext.User.GetUser(_userManager);
+        
+        if (owner == null)
+            throw new Exception("User not found");
+
+        if (owner.IsPremium == false)
+        {
+            var numberOfOwnerEvent = await _context.Events.CountAsync(e => e.OwnerId == owner.Id);
+            if (numberOfOwnerEvent >= 2)
+            {
+                return new BadRequestObjectResult(new MessageResponse
+                {
+                    Success = false,
+                    Message = "You can only create 2 events, upgrade to premium to create more or delete current event."
+                });
+            }
+                
+        }
+        
         var newEvent = await _eventManager.CreateEvent(value, owner);
         return newEvent;
     }
 
     // PUT: api/Event/5
-    [HttpPut("{id}")]
-    public async Task<Event> Put(Guid id, [FromBody] EventCreateDto value)
+    [HttpPut("{id:int}")]
+    public async Task<Event> Put(int id, [FromBody] EventCreateDto value)
     {
         var targetEvent = await _eventManager.EditEvent(id, value);
         return targetEvent;
     }
 
     // DELETE: api/Event/5
-    [HttpDelete("{id}")]
-    public async Task<MessageResponse> Delete(Guid id)
+    [HttpDelete("{id:int}")]
+    public async Task<MessageResponse> Delete(int id)
     {
 
-        var targetEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
-        targetEvent.Tags.Clear();
-        _context.Events.Remove(targetEvent);
+        var appEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+        appEvent.Tags.Clear();
+        _context.Events.Remove(appEvent);
 
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         
         return new MessageResponse() { Message = I18n.Get("event_deleted") };
     }

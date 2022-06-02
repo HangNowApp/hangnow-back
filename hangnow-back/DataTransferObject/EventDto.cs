@@ -54,6 +54,6 @@ public class EventCreateDto
     public int? OwnerId { get; set; }
 
     //public List<UserEventDto>? Users { get; set; }
-    public List<string> Tags { get; set; }
+    public List<int> Tags { get; set; }
     
 }
