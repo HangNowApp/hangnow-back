@@ -5,6 +5,7 @@ using hangnow_back.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hangnow_back.Controllers;
 
@@ -25,31 +26,38 @@ public class EventController : ControllerBase
 
     // GET: api/event
     [HttpGet]
-    public async Task<List<EventListDto>> Index([FromQuery] string? tagId) // add params tagId: Guid
+    public async Task<List<EventListDto>> Index([FromQuery] string? tagId)
     {
         return await _eventManager.GetEventList(tagId);
     }
+    
+    // GET: api/event/user/5
+    [HttpGet("user/{ownerId:int}")]
+    public async Task<List<EventListDto>> EventByOwner(int ownerId)
+    {
+        return await _eventManager.GetEventListByOwner(ownerId);
+    }
 
     // GET: api/event/5
-    [HttpGet("{id:guid}")]
-    public async Task<EventDto?> Get(Guid id)
+    [HttpGet("{id:int}")]
+    public async Task<EventDto?> Get(int id)
     {
         return await _eventManager.GetEvent(id);
     }
 
     // POST: api/event/5/join
-    [HttpPost("{id:guid}/join")]
+    [HttpPatch("{id:int}/join")]
     [Authorize]
-    public async Task<EventDto?> Join(Guid id)
+    public async Task<EventDto?> Join(int id)
     {
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.JoinEvent(id, user);
     }
 
     // POST: api/event/5/join
-    [HttpDelete("{id:guid}/leave")]
+    [HttpDelete("{id:int}/leave")]
     [Authorize]
-    public async Task<MessageResponse?> Leave(Guid id)
+    public async Task<EventDto?> Leave(int id)
     {
         var user = await _userManager.GetUserAsync(HttpContext.User);
         return await _eventManager.LeaveEvent(id, user);
@@ -60,23 +68,58 @@ public class EventController : ControllerBase
     // POST: api/event
     [Authorize]
     [HttpPost]
-    public async Task<Event> Post([FromBody] EventCreateDto value)
+    public async Task<ActionResult<Event>> Post([FromBody] EventCreateDto value)
     {
-        // value.OwnerId = HttpContext.User.GetId();
-        var newEvent = await _eventManager.CreateEvent(value);
+        var owner = await HttpContext.User.GetUser(_userManager);
+        
+        if (owner == null)
+            throw new Exception("User not found");
+
+        if (owner.IsPremium == false)
+        {
+            var numberOfOwnerEvent = await _context.Events.CountAsync(e => e.OwnerId == owner.Id);
+            if (numberOfOwnerEvent >= 2)
+            {
+                return new BadRequestObjectResult(new MessageResponse
+                {
+                    Success = false,
+                    Message = "You can only create 2 events, upgrade to premium to create more or delete current event."
+                });
+            }
+        }
+        
+        var newEvent = await _eventManager.CreateEvent(value, owner);
         return newEvent;
     }
 
     // PUT: api/Event/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    [HttpPut("{id:int}")]
+    public async Task<Event> Put(int id, [FromBody] EventCreateDto value)
     {
-        
+        var targetEvent = await _eventManager.EditEvent(id, value);
+        return targetEvent;
     }
 
     // DELETE: api/Event/5
-    [HttpDelete("{id}")]
-    public void Delete(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<MessageResponse>> Delete(int id)
     {
+        var userId = HttpContext.User.GetId();
+        var appEvent = await _context.Events.Include(e => e.Tags).SingleOrDefaultAsync(e => e.Id == id);
+
+        if (appEvent.OwnerId != userId)
+            return new UnauthorizedObjectResult(
+                new MessageResponse
+                {
+                    Success = false,
+                    Message = "You are not the owner of this event"
+                });
+        
+        appEvent.Tags.Clear();
+        _context.Events.Remove(appEvent);
+
+        await _context.SaveChangesAsync();
+        
+        return new MessageResponse() { Message = I18n.Get("event_deleted") };
     }
 }

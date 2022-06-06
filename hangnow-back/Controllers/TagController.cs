@@ -32,8 +32,8 @@ public class TagController : ControllerBase
     }
 
     // GET: api/Tag/5
-    [HttpGet("{id:Guid}", Name = "Get")]
-    public async Task<Tag?> Get(Guid id)
+    [HttpGet("{id:int}", Name = "Get")]
+    public async Task<Tag?> Get(int id)
     {
         return await _tagManager.GetTag(id);
     }
@@ -49,8 +49,8 @@ public class TagController : ControllerBase
 
     // PUT: api/Tag/5
     // [Authorize]
-    // [HttpPut("{id:Guid}")]
-    // public void Put(Guid id, [FromBody] string value)
+    // [HttpPut("{id:int}")]
+    // public void Put(int id, [FromBody] string value)
     // {
     // }
 

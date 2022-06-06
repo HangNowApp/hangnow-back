@@ -30,7 +30,7 @@ builder.Services.AddDbContext<Context>(options =>
         .EnableSensitiveDataLogging()
         .EnableDetailedErrors());
 
-builder.Services.AddIdentity<User, IdentityRole<Guid>>(options => { })
+builder.Services.AddIdentity<User, IdentityRole<int>>(options => { })
     .AddEntityFrameworkStores<Context>();
 
 builder.Services.AddAuthentication(options =>
@@ -73,7 +73,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    SeedDataApplicationRoles.SeedRoles(services.GetRequiredService<RoleManager<IdentityRole<Guid>>>());
+    SeedDataApplicationRoles.SeedRoles(services.GetRequiredService<RoleManager<IdentityRole<int>>>());
 }
 
 if (builder.Environment.IsDevelopment())
