@@ -8,6 +8,7 @@ using Jwtest;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -104,7 +105,8 @@ public class AuthController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        return new OkObjectResult(UserDto.FromUser(user));
+        var roles = await _userManager.GetRolesAsync(user);
+        return new OkObjectResult(UserDto.FromUser(user, roles));
     }
 
     [Authorize]
@@ -169,7 +171,8 @@ public class AuthController : ControllerBase
     {
         var user = await HttpContext.User.GetUser(_userManager);
 
-        return Ok(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        return Ok(UserDto.FromUser(user, roles));
     }
 
     [HttpGet("{id:int}")]
@@ -180,21 +183,74 @@ public class AuthController : ControllerBase
         if (user == null)
             return NotFound();
 
-        return Ok(UserDto.FromUser(user));
+        var roles = _userManager.GetRolesAsync(user).Result;
+        return Ok(UserDto.FromUser(user, roles));
     }
 
     // controller to add admin to a role
-    [Authorize(Policy = "Admin")]
+    [Authorize(Policy = Roles.Admin)]
     [HttpPost("{id:int}/{role}")]
-    public IActionResult AddToRole(int id, string role)
+    public async Task<IActionResult> AddToRole(int id, string role)
     {
+        // to be sure
+        var userRoles = _userManager.GetRolesAsync(HttpContext.User.GetUser(_userManager).Result).Result;
+        if (!userRoles.Contains(Roles.Admin))
+            return Unauthorized();
+        
         var user = _context.Users.FirstOrDefault(e => e.Id == id);
 
         if (user == null)
             return BadRequest(new {message = I18n.Get("user_not_found")});
+        
+        var roles = await _userManager.GetRolesAsync(user);
 
-        var result = _userManager.AddToRoleAsync(user, role).Result;
-        return Ok(result);
+        return roles.Contains(role) ? Ok(await _userManager.RemoveFromRoleAsync(user, role)) : Ok(await _userManager.AddToRoleAsync(user, role));
+    }
+    
+    // controller to add admin to a role
+    [HttpPost("me/buy_premium")]
+    public async Task<IActionResult> BuyPremium()
+    {
+        var user = await HttpContext.User.GetUser(_userManager);
+
+        if (user == null)
+            return BadRequest(new {message = I18n.Get("user_not_found")});
+
+        var role = Roles.PremiumUser;
+        
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return roles.Contains(role) ? Ok(await _userManager.RemoveFromRoleAsync(user, role)) : Ok(await _userManager.AddToRoleAsync(user, role));
+    }
+    
+    [Authorize(Policy = Roles.Admin)]
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string query)
+    {
+        // to be sure
+        var userRoles = _userManager.GetRolesAsync(HttpContext.User.GetUser(_userManager).Result).Result;
+        if (!userRoles.Contains(Roles.Admin))
+            return Unauthorized();
+        
+        var users = _context.Users.Where(e => e.UserName.Contains(query) || e.Email.Contains(query));
+        var usersDto = await users.Select(e => new UserDto
+            {
+                Id = e.Id,
+                UserName = e.UserName,
+                Email = e.Email,
+                AvatarUrl = e.AvatarUrl
+            }).OrderBy(u => u.Id)
+            .Take(10).ToListAsync();
+
+        // return userdto with roles of all usersDto
+        return Ok(usersDto.Select(e => new UserDto
+        {
+            Id = e.Id,
+            UserName = e.UserName,
+            Email = e.Email,
+            AvatarUrl = e.AvatarUrl,
+            Roles = _userManager.GetRolesAsync(users.First(u => u.Id == e.Id)).Result
+        }));
     }
 
     private string GenerateJwtToken(User user, IEnumerable<string>? roles)

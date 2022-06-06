@@ -75,7 +75,9 @@ public class EventController : ControllerBase
         if (owner == null)
             throw new Exception("User not found");
 
-        if (owner.IsPremium == false)
+        var roles = await _userManager.GetRolesAsync(owner);
+        
+        if (!roles.Contains(Roles.PremiumUser))
         {
             var numberOfOwnerEvent = await _context.Events.CountAsync(e => e.OwnerId == owner.Id);
             if (numberOfOwnerEvent >= 2)

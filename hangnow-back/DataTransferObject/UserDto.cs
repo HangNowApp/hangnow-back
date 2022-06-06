@@ -8,12 +8,11 @@ public class UserDto
     public string UserName { get; set; }
     public string NormalizedUserName { get; set; }
     public string Email { get; set; }
-    public string AvatarUrl { get; set; }
-
+    public string? AvatarUrl { get; set; }
     public string PhoneNumber { get; set; }
-    public bool IsPremium { get; set; }
+    public IList<string> Roles { get; set; }
 
-    public static UserDto FromUser(User user)
+    public static UserDto FromUser(User user, IList<string> roles)
     {
         return new UserDto
         {
@@ -22,8 +21,8 @@ public class UserDto
             NormalizedUserName = user.NormalizedUserName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
-            IsPremium = user.IsPremium,
-            AvatarUrl = user.AvatarUrl
+            AvatarUrl = user.AvatarUrl,
+            Roles = roles
         };
     }
 }

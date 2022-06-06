@@ -8,8 +8,6 @@ public class User : IdentityUser<int>
     public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
 
-    public bool IsPremium { get; set; } = false;
-
     public List<Tag> Tags { get; set; }
     public List<Tag> CreatedTags { get; set; }
     public List<Event> OwnerEvents { get; set; }
