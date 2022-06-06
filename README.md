@@ -15,10 +15,7 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 dotnet ef database update
 ```
 
-Créer une migration pour la db :
-```bash
-dotnet ef migrations add SomeTableChange
-```
+
 ### Front-end
 [Repository front-end](https://github.com/HangNowApp/hangnow-front) 
 
